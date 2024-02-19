@@ -1,0 +1,74 @@
+Initialize C=0, A=2^N, r=-1, b=0
+FOR each n=0,1,... DO
+
+	T = A * p0
+
+	IF xn = 1
+		C = C + T
+		T = 2^P * A - T
+	END
+
+	IF C >= 2^(N+P)
+
+		C = MOD(C, 2^(N+P))
+		% propagate carry
+		emit-bit(1)
+		
+		IF r>0
+			execute r-1 times, emit-bit(0)
+			SET r=0
+		ELSE
+			SET r=-1
+		END
+
+	END
+
+	WHILE T < 2^(N+P-1)
+
+		% renormalize once
+		b = b + 1
+		T = 2 * T
+		C = 2 * C
+		
+		IF C >= 2^(N+P)
+
+			C = MOD(C, 2^(N+P))
+
+			% overflow of C
+			IF r<0
+				emit-bit(1)
+			ELSE
+				r = r + 1
+			END
+		
+		ELSE
+
+			% no overflow of C
+			IF r>=0
+				emit-bit(0)
+				execute r times, emit-bit(1)
+			END
+			
+			SET r = 0
+
+		END
+	
+	END (while)
+
+	SET A = floor(T / 2^P)
+
+END (for)
+
+IF r>= 0
+	emit-bit(0)
+	execute r times, emit-bit(1)
+END
+
+emit N+P bits of register C
+
+
+
+
+
+
+
